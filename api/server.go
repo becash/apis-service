@@ -1,4 +1,4 @@
-package grpc
+package api
 
 import (
 	"apis_service/domain"
@@ -39,12 +39,12 @@ func ListenAndServe(
 
 	go func() {
 		<-stop
-		log.Infow("grpc: attempting graceful shutdown")
+		log.Infow("api: attempting graceful shutdown")
 		grpcServer.GracefulStop()
-		log.Info("grpc: clean shutdown")
+		log.Info("api: clean shutdown")
 	}()
 
-	log.Infof("grpc available on %s", addrGrpc)
+	log.Infof("api available on %s", addrGrpc)
 
 	err := grpcServer.Serve(listener)
 	if err != nil {

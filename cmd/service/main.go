@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	locGrpc "apis_service/grpc"
+	locGrpc "apis_service/api"
 	"apis_service/repository"
 	"apis_service/usecases"
 )
@@ -40,11 +40,11 @@ func main() {
 
 	grpcCon, err := net.Listen("tcp", "0.0.0.0:"+cfg.GrpcPort)
 	if err != nil {
-		log.Panic("grpc", err)
+		log.Panic("api", err)
 	}
 
 	go locGrpc.ListenAndServe(
-		log.Named("grpc"),
+		log.Named("api"),
 		"0.0.0.0:"+cfg.GrpcPort,
 		stopGrpc,
 		useCases,
