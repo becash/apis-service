@@ -1,6 +1,7 @@
-# github.com/becash/apis v0.0.6
+# github.com/becash/apis v0.0.12
 ## explicit; go 1.24
-github.com/becash/apis/gen_go/swallow
+github.com/becash/apis/gen_go/common
+github.com/becash/apis/gen_go/swallow_channel_to_service
 # github.com/golang/snappy v1.0.0
 ## explicit
 github.com/golang/snappy
@@ -238,7 +239,6 @@ google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
-google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/fieldmaskpb
 google.golang.org/protobuf/types/known/structpb
 google.golang.org/protobuf/types/known/timestamppb

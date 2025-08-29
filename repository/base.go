@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"crypto/tls"
 	"time"
 
 	"apis_service/domain"
@@ -23,18 +24,38 @@ func GetMongoDB(cfg *domain.MongoConfig, secondary bool) *mongo.Database {
 	ctxPing, cancelCtxPing := context.WithTimeout(context.Background(), timeoutPing)
 	defer cancelCtxPing()
 
-	cliOpts := options.Client().SetHosts(cfg.Hosts)
+	var cliOpts *options.ClientOptions
+	if cfg.URI != "" {
+		cliOpts = options.Client().ApplyURI(cfg.URI).SetTLSConfig(&tls.Config{}) // TLS enabled
+	} else {
 
-	if cfg.ReplicaSetName == "" {
-		cliOpts = cliOpts.SetDirect(true)
+		cliOpts = options.Client().SetHosts(cfg.Hosts)
+
+		if cfg.Tls {
+			cliOpts = cliOpts.SetTLSConfig(&tls.Config{}) // TLS enabled
+		}
+
+		if cfg.ReplicaSetName == "" {
+			cliOpts = cliOpts.SetDirect(true)
+		}
+		// If username/password are provided, set credentials
+		if cfg.Username != "" && cfg.Password != "" {
+			cred := options.Credential{
+				Username:   cfg.Username,
+				Password:   cfg.Password,
+				AuthSource: "admin",
+			}
+			cliOpts = cliOpts.SetAuth(cred)
+		}
+
+		var maxPoolSize uint64 = 200
+
+		var minPoolSize uint64 = 100
+
+		cliOpts.SetMaxPoolSize(maxPoolSize)
+		cliOpts.SetMinPoolSize(minPoolSize)
+
 	}
-
-	var maxPoolSize uint64 = 200
-
-	var minPoolSize uint64 = 100
-
-	cliOpts.SetMaxPoolSize(maxPoolSize)
-	cliOpts.SetMinPoolSize(minPoolSize)
 
 	cli, err := mongo.Connect(ctx, cliOpts)
 	if err != nil {

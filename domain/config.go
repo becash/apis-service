@@ -3,6 +3,7 @@ package domain
 import (
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/joho/godotenv"
@@ -21,10 +22,14 @@ type Config struct {
 
 type MongoConfig struct {
 	Hosts          []string // coma separated list of host:port
-	DBName         string   `envconfig:"MONGO_DB_NAME"`
+	DBName         string
 	ReadPref       readpref.Mode
-	ReplicaSetName string `envconfig:"MONGO_REPLICA_SET_NAME"`
+	ReplicaSetName string
 	Options        string
+	Username       string
+	Password       string
+	Tls            bool
+	URI            string
 }
 
 // GetReadPref gets from environment ReadPref value for mongo, if not set get from config file.
@@ -41,7 +46,7 @@ func GetReadPref(configFile map[string]string, configKey string, log *zap.Sugare
 	}
 
 	if err != nil {
-		log.Info("invalid or not set", configKey)
+		log.Info("invalid or not set: ", configKey)
 	}
 
 	return readPref
@@ -68,7 +73,32 @@ func GetSliceOfStrings(configFile map[string]string, configKey string, log *zap.
 				log.Warn("invalid or not set: ", configKey)
 			}
 		} else if log != nil {
-			log.Warn("configFile invalid or not set")
+			log.Warn("configFile invalid or not set: ")
+		}
+	}
+
+	return result
+}
+
+// GetBoolValue get boolean value from environment variable, if not set get from config file.
+func GetBoolValue(configFile map[string]string, configKey string, log *zap.SugaredLogger) bool {
+	var err error
+
+	var result bool
+
+	value, ok := os.LookupEnv(configKey)
+	switch {
+	case ok:
+		result, err = strconv.ParseBool(value)
+	case configFile != nil:
+		result, err = strconv.ParseBool(configFile[configKey])
+	case log != nil:
+		log.Warn("configFile invalid or not set: ")
+	}
+
+	if err != nil {
+		if log != nil {
+			log.Info("invalid or not set: ", configKey)
 		}
 	}
 
@@ -93,7 +123,7 @@ func GetStringValue(configFile map[string]string, configKey string, log *zap.Sug
 	if result == "" {
 		if configFile != nil {
 			if log != nil {
-				log.Info("invalid or not set", configKey)
+				log.Info("invalid or not set: ", configKey)
 			}
 		} else if log != nil {
 			log.Warn("configFile invalid or not set")
@@ -120,7 +150,7 @@ func GetLogLevel(configFile map[string]string, configKey string) string {
 	}
 
 	if result == "" {
-		log.Println("invalid or not set", configKey)
+		log.Println("invalid or not set: ", configKey)
 
 		result = defaultLogLevel
 	}
@@ -177,6 +207,10 @@ func NewConfig(cfgFile string) *Config {
 			DBName:         GetStringValue(env, "MONGO_DB_NAME", sugaredLogger),
 			ReadPref:       GetReadPref(env, "MONGO_READ_PREF", sugaredLogger),
 			ReplicaSetName: GetStringValue(env, "MONGO_REPLICA_SET_NAME", sugaredLogger),
+			Username:       GetStringValue(env, "MONGO_USERNAME", sugaredLogger),
+			Password:       GetStringValue(env, "MONGO_PASSWORD", sugaredLogger),
+			Tls:            GetBoolValue(env, "MONGO_TLS", sugaredLogger),
+			URI:            GetStringValue(env, "MONGO_URI", sugaredLogger),
 		},
 	}
 

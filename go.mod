@@ -3,7 +3,7 @@ module apis_service
 go 1.25.0
 
 require (
-	github.com/becash/apis v0.0.6
+	github.com/becash/apis v0.0.12
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1
 	go.mongodb.org/mongo-driver v1.17.4

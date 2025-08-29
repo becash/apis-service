@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/becash/apis/gen_go/swallow"
+	"github.com/becash/apis/gen_go/swallow_channel_to_service"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -15,7 +15,7 @@ import (
 // Server is Structure implementation wrapper
 // all dependency injection goes here.
 type Server struct {
-	swallow.UnimplementedServiceSwallowServer
+	swallow_channel_to_service.UnimplementedServiceToSwallowServer
 	log      *zap.SugaredLogger
 	useCases *usecases.UseCases
 }
@@ -35,7 +35,7 @@ func ListenAndServe(
 		useCases: useCases,
 	}
 
-	swallow.RegisterServiceSwallowServer(grpcServer, serviceServer)
+	swallow_channel_to_service.RegisterServiceToSwallowServer(grpcServer, serviceServer)
 
 	go func() {
 		<-stop
